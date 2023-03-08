@@ -1,5 +1,6 @@
 package com.devol.demo.rtemplate;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +15,16 @@ public class RestTemplateCommunication {
     @Autowired
     private RestTemplate restTemplate;
 
-    // curl http://localhost:8080/rest-feign
+    // curl http://localhost:8080/rest-template
     @GetMapping("/rest-template")
-    public String llamada() {
+    @HystrixCommand(fallbackMethod = "fallback")
+    public String llamada() throws InterruptedException {
         String url =  "http://localhost:8081/rt-llamada";
         String respuesta = restTemplate.getForObject(url, String.class);
         return "\n A:" + questionRestTemplate + "\n B: " + respuesta;
+    }
+    private String fallback() {
+        return "Llamada fallida. No se ha logrado comunicar con el cliente";
     }
 
 
